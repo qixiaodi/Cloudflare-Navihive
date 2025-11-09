@@ -13,8 +13,8 @@
     "d1_databases": [
         {
             "binding": "DB",
-            "database_name": "navigation-db",
-            "database_id": "190635af-6f67-4763-9408-0a187b5b8c2c"  // 替换为第4步获得的 database_id
+            "database_name": "navigation-db-",
+            "database_id": "26c6a6c2-2670-45b4-9f1f-98b848e4bbb5"  // 替换为第4步获得的 database_id
         }
     ],
     "vars": {
