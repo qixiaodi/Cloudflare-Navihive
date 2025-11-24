@@ -788,8 +788,14 @@ export default {
 
                     // 验证更新的站点数据
                     if (data.url !== undefined) {
+                        let url = data.url.trim();
+                        // 如果没有协议,自动添加 https://
+                        if (!/^https?:\/\//i.test(url)) {
+                            url = 'https://' + url;
+                        }
                         try {
-                            new URL(data.url);
+                            new URL(url);
+                            data.url = url; // 使用修正后的URL
                         } catch {
                             return createJsonResponse(
                                 {
@@ -803,8 +809,14 @@ export default {
                     }
 
                     if (data.icon !== undefined && data.icon !== "") {
+                        let iconUrl = data.icon.trim();
+                        // 如果没有协议,自动添加 https://
+                        if (!/^https?:\/\//i.test(iconUrl) && !/^data:/i.test(iconUrl)) {
+                            iconUrl = 'https://' + iconUrl;
+                        }
                         try {
-                            new URL(data.icon);
+                            new URL(iconUrl);
+                            data.icon = iconUrl; // 使用修正后的URL
                         } catch {
                             return createJsonResponse(
                                 {
@@ -1014,6 +1026,7 @@ interface LoginInput {
 interface GroupInput {
     name?: string;
     order_num?: number;
+    is_public?: number;
 }
 
 interface SiteInput {
@@ -1024,6 +1037,7 @@ interface SiteInput {
     description?: string;
     notes?: string;
     order_num?: number;
+    is_public?: number;
 }
 
 interface ConfigInput {
@@ -1071,6 +1085,17 @@ function validateGroup(data: GroupInput): {
         sanitizedData.order_num = data.order_num;
     }
 
+    // 验证 is_public (可选，默认为 1 - 公开)
+    if (data.is_public !== undefined) {
+        if (typeof data.is_public === "number" && (data.is_public === 0 || data.is_public === 1)) {
+            sanitizedData.is_public = data.is_public;
+        } else {
+            errors.push("is_public 必须是 0 (私密) 或 1 (公开)");
+        }
+    } else {
+        sanitizedData.is_public = 1; // 默认公开
+    }
+
     return {
         valid: errors.length === 0,
         errors,
@@ -1104,10 +1129,15 @@ function validateSite(data: SiteInput): {
     if (!data.url || typeof data.url !== "string") {
         errors.push("URL不能为空且必须是字符串");
     } else {
+        let url = data.url.trim();
+        // 如果没有协议,自动添加 https://
+        if (!/^https?:\/\//i.test(url)) {
+            url = 'https://' + url;
+        }
         try {
             // 验证URL格式
-            new URL(data.url);
-            sanitizedData.url = data.url.trim();
+            new URL(url);
+            sanitizedData.url = url;
         } catch {
             errors.push("无效的URL格式");
         }
@@ -1118,10 +1148,15 @@ function validateSite(data: SiteInput): {
         if (typeof data.icon !== "string") {
             errors.push("图标URL必须是字符串");
         } else if (data.icon) {
+            let iconUrl = data.icon.trim();
+            // 如果没有协议,自动添加 https://
+            if (!/^https?:\/\//i.test(iconUrl) && !/^data:/i.test(iconUrl)) {
+                iconUrl = 'https://' + iconUrl;
+            }
             try {
                 // 验证URL格式
-                new URL(data.icon);
-                sanitizedData.icon = data.icon.trim();
+                new URL(iconUrl);
+                sanitizedData.icon = iconUrl;
             } catch {
                 errors.push("无效的图标URL格式");
             }
@@ -1151,6 +1186,17 @@ function validateSite(data: SiteInput): {
         errors.push("排序号必须是数字");
     } else {
         sanitizedData.order_num = data.order_num;
+    }
+
+    // 验证 is_public (可选，默认为 1 - 公开)
+    if (data.is_public !== undefined) {
+        if (typeof data.is_public === "number" && (data.is_public === 0 || data.is_public === 1)) {
+            sanitizedData.is_public = data.is_public;
+        } else {
+            errors.push("is_public 必须是 0 (私密) 或 1 (公开)");
+        }
+    } else {
+        sanitizedData.is_public = 1; // 默认公开
     }
 
     return {

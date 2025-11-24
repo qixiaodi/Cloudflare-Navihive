@@ -32,12 +32,10 @@ export class NavigationClient {
         body: JSON.stringify({ username, password, rememberMe }),
       });
 
-      const data = await response.json();
+      const data: LoginResponse = await response.json();
 
-      // 登陆成功，更新认证状态
-      if (data.success) {
-        this.isAuthenticated = true;
-      }
+      // 根据登录结果更新认证状态
+      this.isAuthenticated = data.success === true;
 
       // Cookie 会自动由浏览器设置，无需手动处理
       return data;
@@ -139,7 +137,6 @@ export class NavigationClient {
   async getGroupsWithSites(): Promise<GroupWithSites[]> {
     return this.request('groups-with-sites');
   }
-
 
   async getGroup(id: number): Promise<Group> {
     return this.request(`groups/${id}`);
